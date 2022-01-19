@@ -1,11 +1,32 @@
+templates:
+    - /etc/alertmanager/my.tmpl
+
 route:
     receiver: 'slack'
 
 receivers:
-    - name: 'slack'
-      slack_configs:
-          - send_resolved: true
-            text: "{{ .CommonAnnotations.description }}"
-            username: 'Prometheus'
-            channel: '#<channel-name>'
-            api_url: 'https://hooks.slack.com/services/<webhook-id>'
+  - name: 'slack'
+    slack_configs:
+      - send_resolved: true
+        username: 'Prometheus'
+        channel: '#alerts'
+        api_url: 'https://hooks.slack.com/services/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'
+#        title: '{{ range .Alerts }}{{ .Annotations.summary }} {{ end }}'
+#        text: "awawawawaw {{ .GroupLabels.app }}/{{ .GroupLabels.alertname }} {{ .CommonAnnotations.description }}"
+        title: '{{ template "slack.title" . }}'
+        text:  '{{ template "slack.text" . }}'
+        color: '{{ template "slack.color" . }}'
+        actions:
+          - type: button
+            text: 'Runbook :green_book:'
+            url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
+          - type: button
+            text: 'Query :mag:'
+            url: '{{ (index .Alerts 0).GeneratorURL }}'
+          - type: button
+            text: 'Dashboard :chart_with_upwards_trend:'
+            url: '{{ (index .Alerts 0).Annotations.dashboard_url }}'
+          - type: button
+            text: 'Silence :no_bell:'
+            url: '{{ template "__alert_silence_link" . }}'
+

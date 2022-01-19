@@ -13,10 +13,14 @@ rule_files:
 
 # A scrape configuration containing exactly one endpoint to scrape.
 scrape_configs:
-  - job_name: 'nodeexporter'
+  - job_name: 'node'
     scrape_interval: 5s
     static_configs:
-      - targets: ['nodeexporter:9100']
+      - targets:
+        - 'nodeexporter:9100'
+        - 'ns5:9100'
+        labels:
+          group: 'system'
 
   - job_name: 'cadvisor'
     scrape_interval: 5s
@@ -33,6 +37,27 @@ scrape_configs:
     honor_labels: true
     static_configs:
       - targets: ['pushgateway:9091']
+
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://eldersoss.com
+          - https://dev.entry.bg
+          - https://websrv01.openadvice.de
+          - https://www.openadvice.de
+          - https://oa-win2016-oa.int.openadvice.de
+          - https://portal.openadvice.de
+          - https://xwiki.int.openadvice.de
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115  # Blackbox exporter scraping address
 
 
 alerting:
