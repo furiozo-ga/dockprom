@@ -10,7 +10,7 @@ receivers:
       - send_resolved: true
         username: 'Prometheus'
         channel: '#alerts'
-        api_url: 'https://hooks.slack.com/services/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'
+        api_url: '<url>'
 #        title: '{{ range .Alerts }}{{ .Annotations.summary }} {{ end }}'
 #        text: "awawawawaw {{ .GroupLabels.app }}/{{ .GroupLabels.alertname }} {{ .CommonAnnotations.description }}"
         title: '{{ template "slack.title" . }}'
