@@ -1,5 +1,5 @@
 templates:
-    - /etc/alertmanager/my.tmpl
+    - my.tmpl
 
 route:
     receiver: 'slack'
@@ -10,7 +10,8 @@ receivers:
       - send_resolved: true
         username: 'Prometheus'
         channel: '#alerts'
-        api_url: '<url>'
+#        api_url: '<url>'
+        api_url_file: slack.url
 #        title: '{{ range .Alerts }}{{ .Annotations.summary }} {{ end }}'
 #        text: "awawawawaw {{ .GroupLabels.app }}/{{ .GroupLabels.alertname }} {{ .CommonAnnotations.description }}"
         title: '{{ template "slack.title" . }}'

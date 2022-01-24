@@ -39,16 +39,19 @@ services:
     networks:
       monitor-net:
         ipv4_address: $NET.90
+    extra_hosts:
+      - host:$NET.1
     labels:
-      org.label-schema.group: "monitoring"
+      group: "monitoring"
 
   alertmanager:
     image: prom/alertmanager:v0.23.0
     container_name: alertmanager
     volumes:
       - ./alertmanager:/etc/alertmanager
+    working_dir: /etc/alertmanager
     command:
-      - '--config.file=/etc/alertmanager/config.yml'
+      - '--config.file=config.yml'
       - '--storage.path=/alertmanager'
 #      - '--log.level=debug'
       - '--web.external-url=http://alertmanager:9093/'
@@ -59,7 +62,7 @@ services:
       monitor-net:
         ipv4_address: $NET.93
     labels:
-      org.label-schema.group: "monitoring"
+      group: "monitoring"
 
   nodeexporter:
     image: prom/node-exporter:v1.3.1
@@ -80,7 +83,7 @@ services:
       monitor-net:
         ipv4_address: $NET.100
     labels:
-      org.label-schema.group: "monitoring"
+      group: "monitoring"
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.43.0
@@ -92,7 +95,7 @@ services:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
-      - /var/lib/docker:/var/lib/docker:ro
+      - $DOCKER_DIR:$DOCKER_DIR:ro
       #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
     restart: unless-stopped
     expose:
@@ -101,7 +104,7 @@ services:
       monitor-net:
         ipv4_address: $NET.80
     labels:
-      org.label-schema.group: "monitoring"
+      group: "monitoring"
 
   grafana:
     image: grafana/grafana:8.3.3
@@ -115,8 +118,12 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
 
+      - GF_INSTALL_PLUGINS=camptocamp-prometheus-alertmanager-datasource
       - GF_UNIFIED_ALERTING_ENABLED=true
       - GF_ALERTING_ENABLED=false
+      - GF_PANELS_ENABLE_ALPHA=true
+      - GF_METRICS_ENABLED=true
+      - GF_METRICS_INTERVAL_SECONDS=15
     restart: unless-stopped
     expose:
       - 3000
@@ -124,7 +131,7 @@ services:
       monitor-net:
         ipv4_address: $NET.2
     labels:
-      org.label-schema.group: "monitoring"
+      group: "monitoring"
 
   pushgateway:
     image: prom/pushgateway:v1.4.2
@@ -136,7 +143,7 @@ services:
       monitor-net:
         ipv4_address: $NET.91
     labels:
-      org.label-schema.group: "monitoring"
+      group: "monitoring"
 
   caddy:
     image: caddy:2.3.0
@@ -157,7 +164,7 @@ services:
       monitor-net:
         ipv4_address: $NET.99
     labels:
-      org.label-schema.group: "monitoring"
+      group: "monitoring"
 
   blackbox:
     image: prom/blackbox-exporter:v0.19.0
@@ -176,5 +183,5 @@ services:
     command: 
       - --config.file=/blackbox/blackbox.yml
     labels:
-      org.label-schema.group: "monitoring"
+      group: "monitoring"
 
